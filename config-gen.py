@@ -1,0 +1,124 @@
+import tkinter
+from tkinter import ttk
+import csv
+import logging
+from ftplib import FTP
+import os
+
+username = os.environ.get('username')
+password = os.environ.get('passwordAD')
+secret = os.environ.get('secret')
+
+# Configure logging
+logging.basicConfig(level=logging.ERROR)
+
+def submit_data():
+    # Get the data from variables
+    hostname = host_name_var.get()
+    ip_address = ip_name_var.get()
+    snmp_location = snmp_name_var.get()
+    data_vlan = data_name_var.get()
+    voice_vlan = voice_name_var.get()
+    model = title_combobox_var.get()
+
+    # Write data to CSV file
+    with open("data.csv", mode="a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([hostname, ip_address, snmp_location, data_vlan, voice_vlan, model])
+
+    print("Data submitted and written to CSV!")
+
+    # Upload CSV file to TFTP server
+    upload_to_ftp(file_path)
+
+def upload_to_ftp(file_path):
+    print(password)
+    print(username)
+    ftp_server_ip = "10.36.50.60"
+    ftp_username = username
+    ftp_password = password
+    ftp_directory = "/home/cceadan"  # Change this to the desired remote directory
+
+    try:
+        # Connect to FTP server
+        with FTP(ftp_server_ip, ftp_username, ftp_password) as ftp:
+            # Change to the remote directory (create if not exists)
+            ftp.cwd(ftp_directory)
+
+            # Upload the file
+            with open(file_path, "rb") as file:
+                ftp.storbinary(f"STOR {file_path}", file)
+
+            print(f"File '{file_path}' uploaded to FTP server successfully.")
+    except Exception as e:
+        print(f"Error uploading file to FTP server: {e}")
+
+# Provide the correct file path
+file_path = "data.csv"
+
+# Print the content of the CSV file to check its format
+try:
+    with open(file_path, "r") as file:
+        csv_content = file.read()
+        print(f"Content of CSV file:\n{csv_content}")
+except FileNotFoundError:
+    print(f"File not found: {file_path}")
+    
+
+window = tkinter.Tk()
+window.title("Configuration Manager")
+
+frame = tkinter.Frame(window)
+frame.pack()
+
+# Label Creation
+user_info_frame = tkinter.LabelFrame(frame, text="User Information")
+user_info_frame.grid(row=0, column=0)
+
+# Labels
+host_name_label = tkinter.Label(user_info_frame, text="Hostname")
+host_name_label.grid(row=0, column=0)
+
+ip_name_label = tkinter.Label(user_info_frame, text="IP Address")
+ip_name_label.grid(row=0, column=1)
+
+snmp_label = tkinter.Label(user_info_frame, text="SNMP Location")
+snmp_label.grid(row=0, column=2)
+
+data_label = tkinter.Label(user_info_frame, text="Data VLAN")
+data_label.grid(row=11, column=0)
+
+voice_label = tkinter.Label(user_info_frame, text="Voice VLAN")
+voice_label.grid(row=11, column=1)
+
+# Creating Data Entry
+host_name_var = tkinter.StringVar()
+ip_name_var = tkinter.StringVar()
+snmp_name_var = tkinter.StringVar()
+data_name_var = tkinter.StringVar()
+voice_name_var = tkinter.StringVar()
+
+host_name_entry = tkinter.Entry(user_info_frame, textvariable=host_name_var)
+ip_name_entry = tkinter.Entry(user_info_frame, textvariable=ip_name_var)
+snmp_name_entry = tkinter.Entry(user_info_frame, textvariable=snmp_name_var)
+data_name_entry = tkinter.Entry(user_info_frame, textvariable=data_name_var)
+voice_name_entry = tkinter.Entry(user_info_frame, textvariable=voice_name_var)
+
+host_name_entry.grid(row=1, column=0)
+ip_name_entry.grid(row=1, column=1)
+snmp_name_entry.grid(row=1, column=2)
+data_name_entry.grid(row=12, column=0)
+voice_name_entry.grid(row=12, column=1)
+
+title_label = tkinter.Label(user_info_frame, text="Model")
+title_combobox_var = tkinter.StringVar()
+title_combobox = ttk.Combobox(user_info_frame, values=["1","C9300L-48PF-4X", "C9200L-24P-4X", "C9300-48U", "WS-C2960X-48FPD-L", "WS-C3650-48FD-L"], textvariable=title_combobox_var)
+title_label.grid(row=0, column=2)
+title_combobox.grid(row=1, column=2)
+
+# Submit Button
+submit_button = tkinter.Button(frame, text="Submit", command=submit_data)
+submit_button.grid(row=1, column=0, sticky="sw", pady=10, padx=10)
+
+window.mainloop()
+
