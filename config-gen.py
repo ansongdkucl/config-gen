@@ -1,16 +1,14 @@
 import tkinter
 from tkinter import ttk
 import csv
-import logging
 from ftplib import FTP
 import os
 
 username = os.environ.get('username')
-password = os.environ.get('passwordAD')
-secret = os.environ.get('secret')
+password = os.environ.get('passwordD')
 
 # Configure logging
-logging.basicConfig(level=logging.ERROR)
+# No need to configure logging here since you are using print statements for messages
 
 def submit_data():
     # Get the data from variables
@@ -28,12 +26,10 @@ def submit_data():
 
     print("Data submitted and written to CSV!")
 
-    # Upload CSV file to TFTP server
-    upload_to_ftp(file_path)
+    # Upload CSV file to FTP server
+    upload_to_ftp()
 
-def upload_to_ftp(file_path):
-    print(password)
-    print(username)
+def upload_to_ftp():
     ftp_server_ip = "10.36.50.60"
     ftp_username = username
     ftp_password = password
@@ -46,25 +42,16 @@ def upload_to_ftp(file_path):
             ftp.cwd(ftp_directory)
 
             # Upload the file
-            with open(file_path, "rb") as file:
-                ftp.storbinary(f"STOR {file_path}", file)
+            with open("data.csv", "rb") as file:
+                ftp.storbinary(f"STOR data.csv", file)
 
-            print(f"File '{file_path}' uploaded to FTP server successfully.")
+            # Update the message label text
+            message_label.config(text="File 'data.csv' uploaded to FTP server successfully.", fg="green")
     except Exception as e:
-        print(f"Error uploading file to FTP server: {e}")
+        # Update the message label text
+        message_label.config(text=f"Error uploading file to FTP server: {e}", fg="red")
 
-# Provide the correct file path
-file_path = "data.csv"
-
-# Print the content of the CSV file to check its format
-try:
-    with open(file_path, "r") as file:
-        csv_content = file.read()
-        print(f"Content of CSV file:\n{csv_content}")
-except FileNotFoundError:
-    print(f"File not found: {file_path}")
-    
-
+# GUI setup
 window = tkinter.Tk()
 window.title("Configuration Manager")
 
@@ -112,7 +99,7 @@ voice_name_entry.grid(row=12, column=1)
 
 title_label = tkinter.Label(user_info_frame, text="Model")
 title_combobox_var = tkinter.StringVar()
-title_combobox = ttk.Combobox(user_info_frame, values=["1","C9300L-48PF-4X", "C9200L-24P-4X", "C9300-48U", "WS-C2960X-48FPD-L", "WS-C3650-48FD-L"], textvariable=title_combobox_var)
+title_combobox = ttk.Combobox(user_info_frame, values=["1", "C9300L-48PF-4X", "C9200L-24P-4X", "C9300-48U", "WS-C2960X-48FPD-L", "WS-C3650-48FD-L"], textvariable=title_combobox_var)
 title_label.grid(row=0, column=2)
 title_combobox.grid(row=1, column=2)
 
@@ -120,5 +107,8 @@ title_combobox.grid(row=1, column=2)
 submit_button = tkinter.Button(frame, text="Submit", command=submit_data)
 submit_button.grid(row=1, column=0, sticky="sw", pady=10, padx=10)
 
-window.mainloop()
+# Message Label
+message_label = tkinter.Label(frame, text="", fg="green")  # You can customize color and other properties
+message_label.grid(row=2, column=0, pady=10, padx=10)
 
+window.mainloop()
