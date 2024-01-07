@@ -15,14 +15,17 @@ def submit_data():
     hostname = host_name_var.get()
     ip_address = ip_name_var.get()
     snmp_location = snmp_name_var.get()
-    data_vlan = data_name_var.get()
-    voice_vlan = voice_name_var.get()
+    data_vlan_id = data_id_var.get()
+    data_vlan_name = data_name_var.get()
+    voice_vlan_id = voice_id_var.get()
+    voice_vlan_name = voice_name_var.get()
+    
     model = title_combobox_var.get()
 
     # Write data to CSV file
-    with open("data.csv", mode="a", newline="") as file:
+    with open("data.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([hostname, ip_address, snmp_location, data_vlan, voice_vlan, model])
+        writer.writerow([hostname, ip_address, snmp_location, data_vlan_id, data_vlan_name, voice_vlan_id, voice_vlan_name, model])
 
     print("Data submitted and written to CSV!")
 

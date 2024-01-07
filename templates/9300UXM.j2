@@ -1,0 +1,181 @@
+
+
+
+!
+hostname {{hostname}}
+enable secret 9 $14$K6Vj$aaAX2VkNoFpRpU$qyFGJdSq3/2TgxylWdsdTWqOQjmordeCOApcwqOTSNQ
+!aaa new-model
+!
+aaa group server tacacs+ TacServer
+ server name tp
+ server name slough
+!
+aaa authentication username-prompt "Please login with local Username: "
+aaa authentication login default group TacServer local
+aaa authentication login console local
+aaa authentication enable default group TacServer enable
+aaa authorization exec default group TacServer if-authenticated 
+aaa accounting exec default start-stop group TacServer
+aaa accounting commands 15 default start-stop group TacServer
+!
+!
+!
+!
+ip name-server 144.82.250.1 193.60.250.1
+ip domain list BCC.AC.UK.
+ip domain list UCL.AC.UK.
+ip domain list AC.UK.
+ip domain list UK.
+ip domain list .
+no ip domain lookup
+ip domain name ucl.ac.uk
+!
+!
+!
+login on-success log
+!
+!
+vtp domain {{hostname}}
+vtp mode transparent
+username oper password 7 {{oper}}
+interface Port-channel17
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 
+ switchport mode trunk
+ switchport nonegotiate
+
+interface range TwoGigabitEthernet1/0/1 - 36
+ switchport access vlan {{access_vlan}}
+ switchport mode access
+ switchport voice vlan {{voice_vlan}}
+ switchport port-security maximum 50
+ switchport port-security violation protect
+ switchport port-security
+ spanning-tree portfast
+!
+!
+interface range Te1/0/47 - 48
+ switchport access vlan {{access_vlan}}
+ switchport mode access
+ switchport voice vlan {{voice_vlan}}
+ switchport port-security maximum 50
+ switchport port-security violation protect
+ switchport port-security
+ spanning-tree portfast
+!
+
+interface Port-channel {{port_channel}}
+ switchport trunk allowed vlan 995
+ switchport mode trunk
+ switchport nonegotiate
+end
+
+
+interface FortyGigabitEthernet1/1/1
+ description Trunk to cisco-ucle-dist-mg
+ switchport trunk allowed vlan 995
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group {{port_channel}} mode active
+end
+
+
+interface Vlan995
+ description Management
+ ip address {{ip_address}} 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+ip default-gateway {{gateway}}
+ip forward-protocol nd
+no ip http server
+ip http authentication local
+no ip http secure-server
+ip tftp source-interface Vlan995
+ip tacacs source-interface Vlan995 
+!
+
+!
+logging host 10.36.50.60
+logging host 10.28.50.60
+ip access-list standard 22
+ 10 permit 10.28.12.0 0.0.0.255
+ 20 permit 10.36.12.0 0.0.0.255
+ 30 permit 128.40.19.0 0.0.0.255
+ 40 permit 172.18.0.0 0.0.3.255
+ 50 permit 10.28.50.0 0.0.0.255
+ 60 permit 10.36.50.0 0.0.0.255
+ 70 permit 10.29.50.0 0.0.0.255
+ 80 permit 10.37.50.0 0.0.0.255
+ 90 permit 10.0.20.0 0.0.0.255
+ 100 deny   any
+ip access-list standard 23
+ 10 permit 10.28.12.0 0.0.0.255
+ 20 permit 10.36.12.0 0.0.0.255
+ 30 permit 10.28.50.0 0.0.0.255
+ 40 permit 10.36.50.0 0.0.0.255
+ 50 permit 10.29.50.0 0.0.0.255
+ 60 permit 10.37.50.0 0.0.0.255
+ 70 permit 128.40.18.0 0.0.1.255
+!
+snmp-server engineID local 00000009020000B064CDEF40
+snmp-server group network-admin v3 priv read ALL-ACCESS access 23
+snmp-server view ALL-ACCESS iso included
+snmp-server community blooming RO 23
+snmp-server location {{location}}
+snmp-server contact CENTRAL: UCL ISD Network Group (020-7679-9500)
+snmp-server chassis-id 0x12
+tacacs-server directed-request
+tacacs-server key 7 00231C070C5E0A021F34424548
+tacacs server tp
+ address ipv4 10.36.50.60
+ key 7 112E16041F170A08143F252F69
+tacacs server slough
+ address ipv4 10.28.50.60
+ key 7 047C040707244D4A190C0B1C53
+!
+
+banner motd ^
+
+       *************************************************************
+       *         This is a UCL Cisco 9300-48P  switch             *
+       *                      Management
+       *                                                           *
+       *  - WARNING: Authorised access ONLY! Disconnect now if     *
+       *    not authorised!                                        *
+       *                                                           *
+       *  - This system is managed by:                             *
+       *                                                           *
+       *    Network Operations Dept., Information Systems          *
+       *    Division, University College London.                   *
+       *                                                           *
+       *    Telephone Number: (020)7-6797-350                      *
+       *    Email: nwg-ops@ucl.ac.uk                               *
+       *                                                           *
+       *************************************************************
+^
+!
+line con 0
+ exec-timeout 60 0
+ logging synchronous
+ login authentication console
+ stopbits 1
+line vty 0 4
+ access-class 22 in
+ exec-timeout 60 0
+ logging synchronous
+ transport input ssh
+line vty 5 15
+ no exec
+ transport input none
+line vty 16 31
+ transport input ssh
+!
+
+ntp server 144.82.250.8
+ntp server 193.60.250.8
+ntp server 193.60.251.3
+ntp server 144.82.251.3
+ntp server 192.60.251.3
+!

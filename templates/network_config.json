@@ -1,0 +1,38 @@
+{
+    "cisco-cbh": {
+        "network_address": "172.17.0.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.3.254",
+        "hosts_range": [
+            "172.17.0.1",
+            "172.17.3.253"
+        ]
+    },
+    "cisco-bw": {
+        "network_address": "172.17.4.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.7.254",
+        "hosts_range": [
+            "172.17.4.1",
+            "172.17.7.253"
+        ]
+    },
+    "cisco-ci": {
+        "network_address": "172.17.8.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.11.254",
+        "hosts_range": [
+            "172.17.8.1",
+            "172.17.11.253"
+        ]
+    },
+    "cisco-cruci": {
+        "network_address": "172.17.12.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.15.254",
+        "hosts_range": [
+            "172.17.12.1",
+            "172.17.15.253"
+        ]
+    }
+}
