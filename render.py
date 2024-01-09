@@ -4,10 +4,14 @@ import ipaddress
 import json
 from ftplib import FTP
 import os
+import logging
 
 username = os.environ.get('username')
 password = os.environ.get('passwordAD')
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Set up the Jinja2 environment with a file system loader
 env = Environment(loader=FileSystemLoader('/home/ansongdk/scripts/GUI/templates'))
@@ -27,10 +31,42 @@ def find_location(ip_address, network_data):
 def download_csv_from_ftp(ftp_server_ip, ftp_username, ftp_password, remote_file, local_file):
     try:
         with FTP(ftp_server_ip, ftp_username, ftp_password) as ftp:
-            ftp.retrbinary(f"RETR {remote_file}", open(local_file, 'wb').write)
-            print(f"Downloaded {remote_file} from FTP server to {local_file}")
+            with open(local_file, 'wb') as csv_file:
+                ftp.retrbinary(f"RETR {remote_file}", csv_file.write)
+
+        logger.info(f"Downloaded {remote_file} from FTP server to {local_file}")
     except Exception as e:
-        print(f"Error downloading file from FTP server: {e}")
+        logger.error(f"Error downloading file from FTP server: {e}")
+
+def upload_to_ftp(ftp_server_ip, ftp_username, ftp_password, local_file, remote_file):
+    try:
+        with FTP(ftp_server_ip, ftp_username, ftp_password) as ftp:
+            with open(local_file, 'rb') as file:
+                ftp.storbinary(f"STOR {remote_file}", file)
+
+        logger.info(f"Uploaded {local_file} to FTP server as {remote_file}")
+    except Exception as e:
+        logger.error(f"Error uploading file to FTP server: {e}")
+
+def render_template(model, hostname, ip_address, access_vlan_id, access_vlan_name, voice_vlan_id, voice_vlan_name, location, gateway, subnet):
+    template_file = model + '.j2'
+    template = env.get_template(template_file)
+
+    # Render the template with the provided data
+    output = template.render(
+        model=model,
+        hostname=hostname,
+        ip_address=ip_address,
+        access_vlan_id=access_vlan_id,
+        access_vlan_name=access_vlan_name,
+        voice_vlan_id=voice_vlan_id,
+        voice_vlan_name=voice_vlan_name,
+        location=location,
+        gateway=gateway,
+        subnet=subnet
+    )
+
+    return output
 
 def main():
     # FTP server details
@@ -45,7 +81,6 @@ def main():
     with open('data.csv', 'r') as f:
         csv_data = csv.reader(f)
         for row in csv_data:
-            #model, hostname, ip_address, access_vlan, access_name, voice_vlan, voice_name, location = row
             hostname, ip_address, location, access_vlan_id, access_vlan_name, voice_vlan_id, voice_vlan_name, model = row
 
             # Load network data from the JSON file
@@ -56,29 +91,30 @@ def main():
             location_data = find_location(ip_address, network_data)
 
             if location_data:
-                template_file = model + '.j2'
-
-                # Load the template from the specified file
-                template = env.get_template(template_file)
-
-                # Render the template with the provided data
-                output = template.render(
+                # Render the template
+                rendered_output = render_template(
                     model=model,
                     hostname=hostname,
                     ip_address=ip_address,
                     access_vlan_id=access_vlan_id,
                     access_vlan_name=access_vlan_name,
-                    voice_vlan_id=voice_vlan_id, 
+                    voice_vlan_id=voice_vlan_id,
                     voice_vlan_name=voice_vlan_name,
                     location=location,
                     gateway=location_data["gateway"],
                     subnet=location_data["subnet_mask"]
                 )
 
-                # Print the rendered output
-                print(output)
+                # Save the rendered output to a local file
+                local_filename = f"{hostname}-confg.txt"
+                with open(local_filename, 'w') as local_file:
+                    local_file.write(rendered_output)
+
+                # Upload the local file to the FTP server
+                remote_filename = f"{hostname}-confg.txt"
+                upload_to_ftp(ftp_server_ip, ftp_username, ftp_password, local_filename, remote_filename)
             else:
-                print(f"No matching location found for IP address: {ip_address}")
+                logger.warning(f"No matching location found for IP address: {ip_address}")
 
 if __name__ == "__main__":
     main()
