@@ -101,7 +101,6 @@ def main():
                     voice_vlan_id=voice_vlan_id,
                     voice_vlan_name=voice_vlan_name,
                     location=location,
-                    oper = '086B584F1B0A0D1E22'
                     gateway=location_data["gateway"],
                     subnet=location_data["subnet_mask"]
                 )
