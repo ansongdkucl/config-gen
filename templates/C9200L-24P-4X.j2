@@ -3,7 +3,7 @@
 
 !
 hostname {{hostname}}
-enable secret 9 $14$K6Vj$aaAX2VkNoFpRpU$qyFGJdSq3/2TgxylWdsdTWqOQjmordeCOApcwqOTSNQ
+enable secret 9 {{secret}}
 !aaa new-model
 !
 aaa group server tacacs+ TacServer
@@ -42,9 +42,9 @@ username oper password 7 {{oper}}
 
 
 interface range gi1/0/1 - 24
- switchport access vlan {{access_vlan}}
+ switchport access vlan {{access_vlan_id}}
  switchport mode access
- switchport voice vlan {{voice_vlan}}
+ switchport voice vlan {{voice_vlan_id}}
  switchport port-security maximum 50
  switchport port-security violation protect
  switchport port-security
@@ -52,7 +52,7 @@ interface range gi1/0/1 - 24
 !
 !
 interface range te1/1/1 - 4
- switchport trunk allowed vlan 995,{{access_vlan}},{{voice_vlan}}
+ switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
  switchport mode trunk
  switchport nonegotiate
  
