@@ -21,6 +21,8 @@ ftp_server_ip = "10.36.50.60"
 ftp_username = username
 ftp_password = password
 
+ip_acl = ""  # Initialize ip_acl as an empty string
+
 def find_location(ip_address, network_data):
     # Convert the IP address string to an ipaddress.IPv4Address object
     ip = ipaddress.IPv4Address(ip_address)
@@ -74,12 +76,14 @@ def render_template(model, hostname, ip_address, access_vlan_id, access_vlan_nam
         voice_vlan_name=voice_vlan_name,
         location=location,
         gateway=gateway,
-        subnet=subnet
+        subnet=subnet,
+        ip_acl=ip_acl,
     )
 
     return output
 
 def submit_data():
+    global ip_acl  # Declare ip_acl as a global variable
     # Get the data from variables
     hostname = host_name_var.get()
     ip_address = ip_name_var.get()
@@ -90,6 +94,10 @@ def submit_data():
     voice_vlan_name = voice_name_var.get()
     
     model = title_combobox_var.get()
+
+    # Calculate the first free octets of the ip_address (assuming it's in the format 'xxx.xxx.xxx.xxx')
+    ip_octets = ip_address.split('.')
+    ip_acl = '.'.join(ip_octets[:2])  # Take the first two octets
 
     # Write data to CSV file
     with open("data.csv", mode="w", newline="") as file:
@@ -102,7 +110,6 @@ def submit_data():
     upload_to_ftp(ftp_server_ip, ftp_username, ftp_password, 'data.csv', 'data.csv')
 
 def ren_main():
-
     # Download 'data.csv' from FTP server to the local directory
     download_csv_from_ftp(ftp_server_ip, ftp_username, ftp_password, 'data.csv', 'data.csv')
 
@@ -112,13 +119,13 @@ def ren_main():
         for row in csv_data:
             hostname, ip_address, location, access_vlan_id, access_vlan_name, voice_vlan_id, voice_vlan_name, model = row
 
-            # Load network data from the JSON file
+            # Load network data from the JSON filedgit 
             with open('network_config.json', 'r') as json_file:
                 network_data = json.load(json_file)
 
             # Find the location data for the given IP address
             location_data = find_location(ip_address, network_data)
-
+            
             if location_data:
                 # Render the template
                 rendered_output = render_template(
@@ -131,7 +138,7 @@ def ren_main():
                     voice_vlan_name=voice_vlan_name,
                     location=location,
                     gateway=location_data["gateway"],
-                    subnet=location_data["subnet_mask"]
+                    subnet=location_data["subnet_mask"],
                 )
 
                 # Save the rendered output to a local file
