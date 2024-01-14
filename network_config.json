@@ -34,5 +34,141 @@
             "172.17.12.1",
             "172.17.15.253"
         ]
+    },
+    "cisco-eng": {
+        "network_address": "172.17.16.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.19.254",
+        "hosts_range": [
+            "172.17.16.1",
+            "172.17.19.253"
+        ]
+    },
+    "cisco-tp-core": {
+        "network_address": "172.17.20.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.23.254",
+        "hosts_range": [
+            "172.17.20.1",
+            "172.17.23.253"
+        ]
+    },
+    "cisco-fc": {
+        "network_address": "172.17.24.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.27.254",
+        "hosts_range": [
+            "172.17.24.1",
+            "172.17.27.253"
+        ]
+    },
+    "cisco-klb-core": {
+        "network_address": "172.17.28.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.31.254",
+        "hosts_range": [
+            "172.17.28.1",
+            "172.17.31.253"
+        ]
+    },
+    "cisco-klb-edge-a": {
+        "network_address": "172.17.32.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.35.254",
+        "hosts_range": [
+            "172.17.32.1",
+            "172.17.35.253"
+        ]
+    },
+    "cisco-klb-edge-b": {
+        "network_address": "172.17.36.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.39.254",
+        "hosts_range": [
+            "172.17.36.1",
+            "172.17.39.253"
+        ]
+    },
+    "cisco-mp": {
+        "network_address": "172.17.40.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.43.254",
+        "hosts_range": [
+            "172.17.40.1",
+            "172.17.43.253"
+        ]
+    },
+    "cisco-phys": {
+        "network_address": "172.17.44.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.47.254",
+        "hosts_range": [
+            "172.17.44.1",
+            "172.17.47.253"
+        ]
+    },
+    "cisco-rf": {
+        "network_address": "172.17.48.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.51.254",
+        "hosts_range": [
+            "172.17.48.1",
+            "172.17.51.253"
+        ]
+    },
+    "cisco-sw": {
+        "network_address": "172.17.52.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.55.254",
+        "hosts_range": [
+            "172.17.52.1",
+            "172.17.55.253"
+        ]
+    },
+    "cisco-tp-edge": {
+        "network_address": "172.17.56.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.59.254",
+        "hosts_range": [
+            "172.17.56.1",
+            "172.17.59.253"
+        ]
+    },
+    "cisco-dw": {
+        "network_address": "172.17.60.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.63.254",
+        "hosts_range": [
+            "172.17.60.1",
+            "172.17.63.253"
+        ]
+    },
+    "cisco-wh-a/b": {
+        "network_address": "172.17.64.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.67.254",
+        "hsrp": ["172.17.67.253", "172.17.67.252"],
+        "hosts_range": [
+            "172.17.64.1",
+            "172.17.67.251"
+        ]
+    },
+    "cisco-zcr reserved": {
+        "network_address": "172.17.68.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.71.254",
+        "hosts_range": [
+            "172.17.68.1",
+            "172.17.71.253"
+        ]
+    },
+    "cisco-wt": {
+        "network_address": "172.17.72.0",
+        "subnet_mask": "255.255.252.0",
+        "gateway": "172.17.75.254",
+        "hosts_range": [
+            "172.17.72.1",
+            "172.17.75.253"
+        ]
     }
 }

@@ -1,14 +1,6 @@
 
-
-vlan {{access_vlan_id}}
- name {{access_vlan_name}}
-!
-vlan {{voice_vlan_id}}
- name {{voice_vlan_name}}
-
-!
 hostname {{hostname}}
-enable secret 9 $14$K6Vj$aaAX2VkNoFpRpU$qyFGJdSq3/2TgxylWdsdTWqOQjmordeCOApcwqOTSNQ
+enable secret 9 {{secret}}
 !aaa new-model
 !
 aaa group server tacacs+ TacServer
@@ -24,8 +16,6 @@ aaa accounting exec default start-stop group TacServer
 aaa accounting commands 15 default start-stop group TacServer
 !
 !
-!
-!
 ip name-server 144.82.250.1 193.60.250.1
 ip domain list BCC.AC.UK.
 ip domain list UCL.AC.UK.
@@ -36,17 +26,14 @@ no ip domain lookup
 ip domain name ucl.ac.uk
 !
 !
-!
 login on-success log
 !
 !
 vtp domain {{hostname}}
 vtp mode transparent
 username oper password 7 {{oper}}
-
-
-
-interface range gi1/0/1 - 48
+!
+interface range gi1/0/1 - 24
  switchport access vlan {{access_vlan_id}}
  switchport mode access
  switchport voice vlan {{voice_vlan_id}}
@@ -55,17 +42,23 @@ interface range gi1/0/1 - 48
  switchport port-security
  spanning-tree portfast
 !
-!
-interface range twe1/1/1 - 2
+
+interface range GigabitEthernet1/1/1 - 4
  switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
  switchport mode trunk
  switchport nonegotiate
- 
+
+!
+interface range te1/1/1 - 4
+ switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
+ switchport mode trunk
+ switchport nonegotiate
+end
 
 
 interface Vlan995
  description Management
- ip address {{ip_address}} {{subnet}}
+ ip address {{ip_address}} 255.255.255.0
  no ip redirects
  no ip unreachables
  no ip proxy-arp
@@ -147,15 +140,6 @@ line vty 5 15
  transport input none
 line vty 16 31
  transport input ssh
-
-logging host 10.28.12.1
-logging host 10.28.12.2
-logging host 10.36.12.1
-logging host 10.36.12.2
-!
-snmp-server view ALL-ACCESS iso included
-snmp-server group network-admin v3 priv read ALL-ACCESS 23
-!
 !
 
 ntp server 144.82.250.8

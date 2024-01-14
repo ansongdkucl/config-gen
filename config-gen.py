@@ -2,21 +2,35 @@ import tkinter
 from tkinter import ttk
 import csv
 from jinja2 import Environment, FileSystemLoader
-import csv
 import ipaddress
 import json
 from ftplib import FTP
 import os
 import logging
+import secrets_store
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Set up the Jinja2 environment with a file system loader
-env = Environment(loader=FileSystemLoader('/home/ansongdk/scripts/GUI/templates'))
 
-username = os.environ.get('username')
-password = os.environ.get('passwordAD')
+# Get the directory of the current script
+script_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Define the relative path to the templates directory
+relative_templates_path = 'templates'
+
+# Combine the script directory and the relative path to get the absolute path to templates
+templates_path = os.path.join(script_directory, relative_templates_path)
+
+env = Environment(loader=FileSystemLoader(templates_path))
+# Set up the Jinja2 environment with a file system loader
+#env = Environment(loader=FileSystemLoader('/home/ansongdk/scripts/GUI/templates'))
+
+username = secrets_store.ftp_user
+password = secrets_store.ftp_pass
+
+#username = os.environ.get('username')
+#password = os.environ.get('passwordAD')
 ftp_server_ip = "10.36.50.60"
 ftp_username = username
 ftp_password = password
@@ -57,7 +71,7 @@ def upload_to_ftp(ftp_server_ip, ftp_username, ftp_password, local_file, remote_
 
         logger.info(f"Uploaded {local_file} to FTP server as {remote_file}")
         print('success')
-        ren_main()
+       
     except Exception as e:
         logger.error(f"Error uploading file to FTP server: {e}")
 
@@ -108,6 +122,7 @@ def submit_data():
 
     # Upload CSV file to FTP server
     upload_to_ftp(ftp_server_ip, ftp_username, ftp_password, 'data.csv', 'data.csv')
+    ren_main()
 
 def ren_main():
     # Download 'data.csv' from FTP server to the local directory
@@ -212,7 +227,7 @@ voice_name_entry.grid(row=19, column=1)
 
 title_label = tkinter.Label(user_info_frame, text="Model")
 title_combobox_var = tkinter.StringVar()
-title_combobox = ttk.Combobox(user_info_frame, values=["1", "C9300L-48PF-4X", "C9200L-24P-4X", "C9300-48U", "WS-C2960X-48FPD-L", "WS-C3650-48FD-L"], textvariable=title_combobox_var)
+title_combobox = tkinter.ttk.Combobox(user_info_frame, values=["C9200L-24P-4X", "C9300-48U", "WS-C2960X-48FPD-L", "WS-C3650-48FD-L"], textvariable=title_combobox_var)
 title_label.grid(row=18, column=2)
 title_combobox.grid(row=19, column=2)
 
@@ -225,4 +240,3 @@ message_label = tkinter.Label(frame, text="", fg="green")  # You can customize c
 message_label.grid(row=3, column=0, pady=10, padx=10)
 
 window.mainloop()
-
