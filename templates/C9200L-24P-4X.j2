@@ -3,7 +3,10 @@
 
 !
 hostname {{hostname}}
-enable secret 9 {{secret}}
+!
+username oper password 7 123D071B140A0F573A2A280572
+!
+enable secret 9 $14$mMvC$wZ1Uc4oVwIsQ/E$lU6ZL6QqKcrKwZaXVU8qmFPhaabQI3HZzByVYqIgiPo
 !aaa new-model
 !
 aaa group server tacacs+ TacServer
@@ -42,26 +45,31 @@ username oper password 7 {{oper}}
 
 
 interface range gi1/0/1 - 24
- switchport access vlan {{access_vlan_id}}
+ switchport access vlan {{ access_vlan_id }}
  switchport mode access
- switchport voice vlan {{voice_vlan_id}}
+ {% if voice_vlan_id is defined and voice_vlan_id != '' -%}
+ switchport voice vlan {{ voice_vlan_id }}
+ {% endif -%}
  switchport port-security maximum 50
  switchport port-security violation protect
  switchport port-security
  spanning-tree portfast
 !
 !
-interface range te1/1/1 - 4
- switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
+!
+interface range GigabitEthernet1/1/1 - 4
+ switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
  switchport mode trunk
  switchport nonegotiate
- 
-end
 
-
+interface range te1/1/1 - 4
+ switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
+ switchport mode trunk
+ switchport nonegotiate
+!
 interface Vlan995
  description Management
- ip address {{ip_address}} 255.255.255.0
+ ip address {{ip_address}} {{subnet}}
  no ip redirects
  no ip unreachables
  no ip proxy-arp
@@ -144,10 +152,14 @@ line vty 5 15
 line vty 16 31
  transport input ssh
 !
-
+!
 ntp server 144.82.250.8
 ntp server 193.60.250.8
 ntp server 193.60.251.3
 ntp server 144.82.251.3
 ntp server 192.60.251.3
 !
+crypto key generate rsa modulus 2048
+!
+!
+

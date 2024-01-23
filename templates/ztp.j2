@@ -1,0 +1,82 @@
+import cli
+
+print "\n\n *** Zero Touch Script Activated *** \n\n"
+
+print "Configure vlan interface, gateway, aaa, and enable netconf-yang\n\n"
+
+cli.configurep(["hostname {{hostname}}"])
+
+cli.configurep(["enable secret 9 $9$1id6DJ3k7VDsy.$xQdLGkwAtdW7xPBFIRNMIRZvemJRl1WsiVuDOilcxE21"])
+cli.configurep(["username oper password 7 086B584F1B0A0D1E22"])
+
+print "Configure AAA Authentication \n\n"
+
+cli.configurep(["aaa new-model"])
+cli.configurep(["aaa authentication username-prompt' Please login with local Username: '" ])
+cli.configurep(["aaa authentication login default group tacacs+ local"])
+cli.configurep(["aaa authentication login console local"])
+cli.configurep(["aaa authentication enable default group tacacs+ enable"])
+cli.configurep(["aaa authorization exec default group tacacs+ if-authenticated"])
+cli.configurep(["aaa accounting exec default start-stop group tacacs+"])
+cli.configurep(["aaa accounting commands 15 default start-stop group tacacs+"])
+
+cli.configurep(['vlan 28','name 128.40.41.0_24'])
+
+
+cli.configurep(['vlan 33','name 128.40.100.100/24'])
+ 
+ 
+
+
+cli.configurep(['interface range gi1/0/1 - 48','switchport mode access','swichport access vlan ','spanning-tree portfast'
+,'switchport voice vlan 33'])
+
+ 
+
+cli.configurep(["tacacs server tp","address ipv4 10.36.50.60","key 7 112****"])
+cli.configurep(["tacacs server slough","address ipv4 10.28.50.60","key 7 00****"])
+ 
+
+print "Configure Management Vlan 995\n\n"
+cli.configurep(["int vlan 995", "ip address 172.17.35.100 255.255.255.0", "no shut", "end"])
+cli.configurep(["ip default-gateway 172.17.35.254", "end"])
+
+print "configure trunk"
+cli.configurep(["int range te1/1/1 - 4  ", "switchport trunk native vlan 1001","switchport mode trunk","switchport nonegotiate", "switchport trunk allowed vlan 995,990,915,487", "end"])
+
+cli.configurep(["logging host 10.36.50.60"])
+cli.configurep(["logging host 10.28.50.60"])
+
+cli.configurep(["ip access-list standard 22", "10 permit 128.40.19.0 0.0.0.255", "20 permit 172.17.107.0 0.0.0.255",
+"30 permit 10.28.50.0 0.0.0.255", "40 permit 10.36.50.0 0.0.0.255", "50 permit 10.29.50.0 0.0.0.255","60 permit 10.37.50.0 0.0.0.255","70 deny   any"])
+
+cli.configurep(["ip access-list standard 23", "10 permit 10.28.50.0 0.0.0.255", "20 permit 10.36.50.0 0.0.0.255",
+"30 permit 10.29.50.0 0.0.0.255", "40 permit 10.37.50.0 0.0.0.255", "50 permit 128.40.18.0 0.0.1.255","60 deny   any"])
+
+ 
+cli.configurep(['snmp-server community blooming RO 23'])
+
+cli.configurep(["snmp-server location Test LAB"])
+
+
+cli.configurep(['line con 0','exec-timeout 60 0','logging synchronous','login authentication console'])
+cli.configurep(['line vty 0 4','access-class 22 in','exec-timeout 60 0','logging synchronous','length 0','transport input ssh'])
+cli.configurep(['line vty 5 15,','exec-timeout 60 0','logging synchronous','transport input ssh'])
+ 
+ 
+cli.configurep(['ntp server 193.60.251.3'])
+cli.configurep(['ntp server 144.82.251.3'])
+cli.configurep(['ntp server 193.60.250.8'])
+cli.configurep(['ntp server 144.82.250.8'])
+ 
+
+
+print "\n\n *** Executing show ip interface brief  *** \n\n"
+
+cli_command = "sh run "
+
+cli.executep(cli_command)
+
+print "\n\n *** ZTP Script Execution Complete *** \n\n"
+
+cli.configurep(["netconf-yang", "end"])

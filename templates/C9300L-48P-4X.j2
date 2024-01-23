@@ -44,16 +44,16 @@ interface range gi1/0/1 - 24
 !
 
 interface range GigabitEthernet1/1/1 - 4
- switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
+ switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
  switchport mode trunk
  switchport nonegotiate
 
 !
 interface range te1/1/1 - 4
- switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
+ switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
  switchport mode trunk
  switchport nonegotiate
-end
+
 
 
 interface Vlan995

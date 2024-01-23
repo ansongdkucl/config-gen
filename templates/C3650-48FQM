@@ -1,14 +1,13 @@
 
-
-
-!
 hostname {{hostname}}
-enable secret 9 $14$K6Vj$aaAX2VkNoFpRpU$qyFGJdSq3/2TgxylWdsdTWqOQjmordeCOApcwqOTSNQ
-!aaa new-model
+enable secret 9 {{secret}}
+!
 !
 aaa group server tacacs+ TacServer
  server name tp
  server name slough
+!
+!aaa new-model
 !
 aaa authentication username-prompt "Please login with local Username: "
 aaa authentication login default group TacServer local
@@ -17,8 +16,6 @@ aaa authentication enable default group TacServer enable
 aaa authorization exec default group TacServer if-authenticated 
 aaa accounting exec default start-stop group TacServer
 aaa accounting commands 15 default start-stop group TacServer
-!
-!
 !
 !
 ip name-server 144.82.250.1 193.60.250.1
@@ -31,71 +28,45 @@ no ip domain lookup
 ip domain name ucl.ac.uk
 !
 !
-!
 login on-success log
 !
 !
 vtp domain {{hostname}}
 vtp mode transparent
 username oper password 7 {{oper}}
-interface Port-channel17
- switchport trunk native vlan 1001
- switchport trunk allowed vlan 
- switchport mode trunk
- switchport nonegotiate
-
-interface range TwoGigabitEthernet1/0/1 - 36
- switchport access vlan {{access_vlan}}
- switchport mode access
- switchport voice vlan {{voice_vlan}}
- switchport port-security maximum 50
- switchport port-security violation protect
- switchport port-security
- spanning-tree portfast
 !
-!
-interface range Te1/0/47 - 48
- switchport access vlan {{access_vlan}}
+interface range gi1/0/1 - 24
+ switchport access vlan {{access_vlan_id}}
  switchport mode access
- switchport voice vlan {{voice_vlan}}
+ switchport voice vlan {{voice_vlan_id}}
  switchport port-security maximum 50
  switchport port-security violation protect
  switchport port-security
  spanning-tree portfast
 !
 
-interface Port-channel {{port_channel}}
- switchport trunk allowed vlan 995
+interface range GigabitEthernet1/1/1 - 4
+ switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
  switchport mode trunk
  switchport nonegotiate
-end
 
-
-interface FortyGigabitEthernet1/1/1
- description Trunk to cisco-ucle-dist-mg
- switchport trunk allowed vlan 995
+!
+interface range te1/1/1 - 4
+ switchport trunk allowed vlan 995,{{access_vlan_id}},{{voice_vlan_id}}
  switchport mode trunk
  switchport nonegotiate
- channel-group {{port_channel}} mode active
 end
 
 
 interface Vlan995
  description Management
- ip address {{ip_address}} 255.255.255.0
+ ip address {{ip_address}} {{subnet}}
  no ip redirects
  no ip unreachables
  no ip proxy-arp
 !
 ip default-gateway {{gateway}}
-ip forward-protocol nd
-no ip http server
-ip http authentication local
-no ip http secure-server
-ip tftp source-interface Vlan995
-ip tacacs source-interface Vlan995 
 !
-
 !
 logging host 10.36.50.60
 logging host 10.28.50.60
@@ -103,7 +74,7 @@ ip access-list standard 22
  10 permit 10.28.12.0 0.0.0.255
  20 permit 10.36.12.0 0.0.0.255
  30 permit 128.40.19.0 0.0.0.255
- 40 permit 172.18.0.0 0.0.3.255
+ 40 permit {{ip_acl}} 0.0.3.255
  50 permit 10.28.50.0 0.0.0.255
  60 permit 10.36.50.0 0.0.0.255
  70 permit 10.29.50.0 0.0.0.255
@@ -139,7 +110,7 @@ tacacs server slough
 banner motd ^
 
        *************************************************************
-       *         This is a UCL Cisco 9300-48P  switch             *
+       *         This is a UCL Cisco 3650-48P  switch             *
        *                      Management
        *                                                           *
        *  - WARNING: Authorised access ONLY! Disconnect now if     *
