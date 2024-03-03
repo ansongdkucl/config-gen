@@ -4,10 +4,22 @@
 !
 hostname {{hostname}}
 !
+vlan 995
+ name Management
+
+Vlan {{ access_vlan_id }}
+ name {{ access_vlan_name }}
+{% if voice_vlan_id is defined and voice_vlan_id != '' -%}
+Vlan {{ voice_vlan_id }}
+ name {{voice_vlan_name }}
+{% endif -%}
+!
 username oper password 7 123D071B140A0F573A2A280572
 !
 enable secret 9 $14$mMvC$wZ1Uc4oVwIsQ/E$lU6ZL6QqKcrKwZaXVU8qmFPhaabQI3HZzByVYqIgiPo
-!aaa new-model
+
+
+aaa new-model
 !
 aaa group server tacacs+ TacServer
  server name tp
@@ -57,13 +69,8 @@ interface range gi1/0/1 - 24
 !
 !
 !
-interface range GigabitEthernet1/1/1 - 4
- switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
- switchport mode trunk
- switchport nonegotiate
-
 interface range te1/1/1 - 4
- switchport trunk allowed vlan 995, {{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
+ switchport trunk allowed vlan 995,{{ access_vlan_id }}{% if voice_vlan_id is defined and voice_vlan_id != '' %},{{ voice_vlan_id }}{% endif %}
  switchport mode trunk
  switchport nonegotiate
 !
@@ -83,13 +90,12 @@ ip access-list standard 22
  10 permit 10.28.12.0 0.0.0.255
  20 permit 10.36.12.0 0.0.0.255
  30 permit 128.40.19.0 0.0.0.255
- 40 permit {{ip_acl}} 0.0.3.255
+ 40 permit {{ip_acl}}.0 0.0.3.255
  50 permit 10.28.50.0 0.0.0.255
  60 permit 10.36.50.0 0.0.0.255
  70 permit 10.29.50.0 0.0.0.255
  80 permit 10.37.50.0 0.0.0.255
- 90 permit 10.0.20.0 0.0.0.255
- 100 deny   any
+ 90 deny   any
 ip access-list standard 23
  10 permit 10.28.12.0 0.0.0.255
  20 permit 10.36.12.0 0.0.0.255
