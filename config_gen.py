@@ -51,6 +51,8 @@ def find_location(ip_address, network_data):
     return None
 
 def upload_with_sftp(hostname, username, password, local_file, remote_file):
+  print(f'starting upload to tftp moudule')
+  
   try:
     transport = paramiko.Transport((hostname, 22))
     transport.connect(username=username, password=password)
