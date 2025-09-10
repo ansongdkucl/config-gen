@@ -1,0 +1,170 @@
+import cli
+
+print("\n\n *** Zero Touch Script Activated *** \n\n")
+
+print("Configure VLAN interface, gateway, AAA, and enable netconf-yang\n\n")
+
+cli.configurep(["hostname {{hostname}}"])
+
+cli.configurep(["enable secret 9 $14$mMvC$wZ1Uc4oVwIsQ/E$lU6"])
+cli.configurep(["username oper password 7 123D071B140A0F573A2A280572"])
+                                      
+print("Configure AAA Authentication\n\n")
+
+cli.configurep([
+    "aaa new-model",
+    "aaa authentication username-prompt 'Please login with local Username: '",
+    "aaa authentication login default group tacacs+ local",
+    "aaa authentication login console local",
+    "aaa authentication enable default group tacacs+ enable",
+    "aaa authorization exec default group tacacs+ if-authenticated",
+    "aaa accounting exec default start-stop group tacacs+",
+    "aaa accounting commands 15 default start-stop group tacacs+"
+])
+
+cli.configurep([
+    "vlan {{access_vlan_id}}",
+    "name {{access_vlan_name}}"
+])
+
+cli.configurep([
+    "vlan {{voice_vlan_id}}",
+    "name {{voice_vlan_name}}"
+])
+
+print("Configure Access Ports\n\n")
+
+cli.configurep([
+    "interface range tw1/0/1 - 35",
+    "switchport mode access",
+    "switchport access vlan {{access_vlan_id}}",
+    "spanning-tree portfast",
+    "switchport voice vlan {{voice_vlan_id}}"
+])
+
+cli.configurep([
+    "interface range te1/0/37 - 48",
+    "switchport mode access",
+    "switchport access vlan {{access_vlan_id}}",
+    "spanning-tree portfast",
+    "switchport voice vlan {{voice_vlan_id}}"
+])
+
+print("Configure Uplink Ports and Port Channel\n\n")
+
+cli.configurep([
+    "interface FortyGigabitEthernet1/1/1",
+    "description Trunk to cisco-ucle-dist-psw",
+    "channel-group 26 mode active"
+])
+
+cli.configurep([
+    "interface FortyGigabitEthernet1/1/2",
+    "description Trunk to cisco-ucle-dist-psw",
+    "channel-group 26 mode active"
+])
+
+cli.configurep([
+    "interface Port-channel26",
+    "switchport trunk native vlan 1001",
+    "switchport trunk allowed vlan {{access_vlan_id}},{{voice_vlan_id}},995",
+    "switchport mode trunk",
+    "switchport nonegotiate"
+])
+
+cli.configurep([
+    "tacacs server tp",
+    "address ipv4 10.36.50.60",
+    "key 7 112E16041F170A08143F252F69"
+])
+
+cli.configurep([
+    "tacacs server slough",
+    "address ipv4 10.28.50.60",
+    "key 7 47C040707244D4A190C0B1C53"
+])
+
+print("Configure Management VLAN 995\n\n")
+
+cli.configurep([
+    "interface vlan 995",
+    "ip address {{ip_address}} {{subnet}}",
+    "no ip redirects",
+    "no ip unreachables",
+    "no ip proxy-arp",
+    "no shut",
+    "end"
+])
+
+cli.configurep([
+    "ip default-gateway {{gateway}}",
+    "end"
+])
+
+cli.configurep(["logging host 10.36.50.60"])
+cli.configurep(["logging host 10.28.50.60"])
+
+cli.configurep([
+    "ip access-list standard 22",
+    "10 permit 10.28.12.0 0.0.0.255",
+    "20 permit 10.36.12.0 0.0.0.255",
+    "30 permit 128.40.19.0 0.0.0.255",
+    "40 permit {{ip_acl}}.0 0.0.3.255",
+    "50 permit 10.28.50.0 0.0.0.255",
+    "60 permit 10.36.50.0 0.0.0.255",
+    "70 permit 10.29.50.0 0.0.0.255",
+    "80 permit 10.37.50.0 0.0.0.255",
+    "90 deny any"
+])
+
+cli.configurep([
+    "ip access-list standard 23",
+    "10 permit 10.28.12.0 0.0.0.255",
+    "20 permit 10.36.12.0 0.0.0.255",
+    "30 permit 10.28.50.0 0.0.0.255",
+    "40 permit 10.36.50.0 0.0.0.255",
+    "50 permit 10.29.50.0 0.0.0.255",
+    "60 permit 10.37.50.0 0.0.0.255",
+    "70 permit 128.40.18.0 0.0.1.255",
+    "80 deny any"
+])
+
+cli.configurep(["snmp-server community blooming RO 23"])
+cli.configurep(["snmp-server location {{location}}"])
+
+cli.configurep([
+    "line con 0",
+    "exec-timeout 60 0",
+    "logging synchronous",
+    "login authentication console"
+])
+
+cli.configurep([
+    "line vty 0 4",
+    "access-class 22 in",
+    "exec-timeout 60 0",
+    "logging synchronous",
+    "length 0",
+    "transport input ssh"
+])
+
+cli.configurep([
+    "line vty 5 15",
+    "exec-timeout 60 0",
+    "logging synchronous",
+    "transport input ssh"
+])
+
+cli.configurep(["ntp server 193.60.251.3"])
+cli.configurep(["ntp server 144.82.251.3"])
+cli.configurep(["ntp server 193.60.250.8"])
+cli.configurep(["ntp server 144.82.250.8"])
+
+print("\n\n *** Executing show ip interface brief *** \n\n")
+
+cli_command = "sh run"
+cli.executep(cli_command)
+
+print("\n\n *** ZTP Script Execution Complete *** \n\n")
+
+cli.configurep(["netconf-yang", "end"])

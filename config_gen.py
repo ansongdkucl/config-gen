@@ -1,3 +1,4 @@
+##ccb6c89ac300
 import tkinter as tk
 from tkinter import ttk, messagebox
 import csv
@@ -401,7 +402,9 @@ class ConfigurationGUI:
                 "C9300L-48P-4X",
                 "WS-C3650-48FD-L",
                 "ZTP-C9200L-24P-4X",
-                "ZTP-C9200L-24P-4X"
+                "ZTP-C9200L-24P-4X",
+                "ZTP-C9300-48P-UXM"
+
             ], 
             textvariable=self.model_var
         )
